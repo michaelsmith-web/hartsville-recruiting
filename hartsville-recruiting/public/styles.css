@@ -1,1 +1,98 @@
-:root{--red:#c50e37;--dark:#0e0e12;--muted:#a9a9b0}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#0e0e12;color:#fff;font-family:Arial,Helvetica,sans-serif}a{color:inherit;text-decoration:none}.topbar{height:78px;padding:10px max(5%,calc((100% - 1300px)/2));display:flex;justify-content:space-between;align-items:center;background:#101014;position:sticky;top:0;z-index:10;border-bottom:1px solid #27272d}.brand{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:900;letter-spacing:1px}.brand img{width:53px;height:53px;object-fit:contain}.brand small{display:block;font-size:10px;color:#d7d7dc;letter-spacing:2.5px;margin-top:4px}.topbar nav{display:flex;gap:27px;font-size:12px;font-weight:800;letter-spacing:1.2px}.topbar nav a:hover{color:#f14769}.hero{min-height:600px;position:relative;display:flex;align-items:center;background:url('/stadium.png') center 46%/cover no-repeat}.hero-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,5,8,.94),rgba(5,5,8,.72) 49%,rgba(5,5,8,.12))}.hero-content{position:relative;z-index:1;width:min(1300px,90%);margin:auto;padding:65px 0}.eyebrow{font-size:12px;letter-spacing:2.5px;color:#fa486d;font-weight:900}.hero h1{font-size:clamp(39px,5.7vw,82px);line-height:1.03;letter-spacing:-2.6px;margin:22px 0;font-weight:1000}.hero h1 em{font-style:normal;color:#fa345f}.hero p{max-width:560px;color:#e0dfe3;line-height:1.7;font-size:16px}.cta{display:inline-flex;gap:26px;align-items:center;background:var(--red);padding:18px 23px;font-size:13px;font-weight:900;letter-spacing:1px;margin-top:22px}.cta:hover{background:#e71a4a}.intro{background:#18181e;display:flex;align-items:center;justify-content:center;gap:42px;padding:48px 5%}.intro img{width:130px;height:125px;object-fit:contain}.intro h2,.section h2,.program h2{font-size:clamp(30px,4vw,52px);margin:10px 0;letter-spacing:-1px}.intro b,.section h2 b,.program b{color:#ef345b}.intro p{color:#aaa}.section{max-width:1300px;margin:auto;padding:90px 5%}.section-top{display:flex;align-items:end;justify-content:space-between;gap:15px}.count{font-size:12px;letter-spacing:1px;color:#bbb}.filters{display:flex;gap:12px;margin:27px 0 30px}.search{flex:1;display:flex;align-items:center;gap:12px;background:#1e1e25;padding:0 15px;border:1px solid #393941}.search span{font-size:26px;color:#aaa}input,select{background:#1e1e25;color:#fff;border:1px solid #393941;padding:16px;font-size:14px;min-width:0}input{border:0;width:100%;outline:0}select{min-width:160px}.status{padding:35px;border:1px dashed #555;text-align:center;color:#b8b8c0;line-height:1.7}.status:empty{display:none}.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:20px}.player{background:#1a1a20;border:1px solid #34343b;overflow:hidden}.player img{display:block;width:100%;height:260px;object-fit:cover;object-position:center top;background:#08080a}.player .info{padding:19px}.player .num{color:#f34b70;font-size:12px;font-weight:900}.player h3{font-size:23px;margin:8px 0}.player .meta{color:#b8b8bf;font-size:13px}.player button{margin-top:16px;width:100%;padding:12px;background:#c50e37;border:0;color:#fff;font-weight:800;cursor:pointer}.program{display:grid;grid-template-columns:1fr 1fr;background:#1b1b22;min-height:350px}.program-img{background:url('/field.png') center/cover no-repeat}.program-text{padding:70px 10%;display:flex;flex-direction:column;justify-content:center}.program-text p,.contact p{line-height:1.8;color:#bbb;max-width:720px}.contact{min-height:330px}.small{font-size:12px}footer{background:#09090b;border-top:1px solid #29292f;padding:25px 5%;display:flex;gap:18px;align-items:center;justify-content:space-between;color:#999;font-size:11px;letter-spacing:1px}footer img{width:45px;height:45px;object-fit:contain}dialog{max-width:720px;width:calc(100% - 30px);background:#1b1b21;color:#fff;border:1px solid #555;padding:30px}dialog::backdrop{background:#000b}#close{float:right;background:transparent;color:#fff;border:0;font-size:23px;cursor:pointer}.profile-header{display:flex;gap:22px;align-items:center}.profile-header img{width:145px;height:170px;object-fit:cover;background:#111}.profile-header h2{font-size:30px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}.stat{background:#292930;padding:13px}.stat small{display:block;color:#aaa;margin-bottom:8px}.hudl{display:inline-block;background:#c50e37;padding:13px 18px;font-weight:800}.empty{color:#aaa}@media(max-width:700px){.topbar{height:70px;padding:8px 4%}.brand{font-size:13px}.brand img{width:42px;height:42px}.brand small{font-size:8px}.topbar nav{gap:10px;font-size:9px}.hero{min-height:520px}.hero h1{letter-spacing:-1.4px}.intro{gap:15px}.intro img{width:88px}.filters{flex-direction:column}.program{grid-template-columns:1fr}.program-img{height:220px}.program-text{padding:45px 7%}footer{flex-wrap:wrap}.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* HARTSVILLE RECRUITING UPDATES */
+
+/* Coach contact section */
+
+.coach-contact {
+  margin-top: 30px;
+  padding: 30px;
+  background: #1a1a20;
+  border: 1px solid #34343b;
+  border-left: 5px solid #c50e37;
+  max-width: 760px;
+}
+
+.coach-contact h3 {
+  color: #ffffff;
+  font-size: 25px;
+  margin: 0 0 12px;
+}
+
+.coach-contact p {
+  margin: 12px 0;
+}
+
+.coach-contact a:not(.cta) {
+  color: #fa486d;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.coach-contact a:hover {
+  text-decoration: underline;
+}
+
+/* Player profile sections */
+
+.profile-section {
+  margin-top: 28px;
+}
+
+.profile-section h3 {
+  color: #fa486d;
+  font-size: 16px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #393941;
+  padding-bottom: 12px;
+  margin-bottom: 15px;
+}
+
+.profile-section .stats {
+  margin-top: 15px;
+}
+
+.stat strong {
+  font-size: 20px;
+  color: #ffffff;
+}
+
+/* Player action photographs */
+
+.player img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+/* Player profile headshots */
+
+.profile-header img {
+  width: 160px;
+  height: 190px;
+  object-fit: cover;
+  object-position: center top;
+  border: 2px solid #c50e37;
+}
+
+/* Mobile improvements */
+
+@media (max-width: 700px) {
+  .coach-contact {
+    padding: 20px;
+  }
+
+  .coach-contact h3 {
+    font-size: 21px;
+  }
+
+  .profile-header img {
+    width: 115px;
+    height: 145px;
+  }
+
+  .profile-section .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
