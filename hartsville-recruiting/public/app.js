@@ -1,1 +1,206 @@
-let players=[];const $=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));function safeUrl(v){try{const u=new URL(v);return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return ''}}function photoUrl(s){const u=safeUrl(s);if(!u)return '/red-foxes.png';const m=u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/);return m?`https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w900`:u}function fillSelect(id,field){const s=$(id),old=s.value;[...new Set(players.map(p=>p[field]).filter(Boolean))].sort().forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)});s.value=old}function render(){const term=$('#search').value.trim().toLowerCase(),pos=$('#position').value,yr=$('#year').value;const shown=players.filter(p=>(!term||p.name.toLowerCase().includes(term)||p.number.toLowerCase().includes(term))&&(!pos||p.position===pos)&&(!yr||p.year===yr));$('#count').textContent=`${shown.length} ATHLETE${shown.length===1?'':'S'}`;$('#roster').innerHTML=shown.map(p=>`<article class="player"><img src="${esc(photoUrl(p.photo))}" onerror="this.onerror=null;this.src='/red-foxes.png'" alt="${esc(p.name)} headshot"><div class="info"><div class="num">${p.number?'#'+esc(p.number)+' · ':''}${esc(p.year?'CLASS OF '+p.year:'HARTSVILLE RED FOXES')}</div><h3>${esc(p.name)}</h3><div class="meta">${esc(p.position||'Position to be announced')} ${p.height?' · '+esc(p.height):''}</div><button data-id="${p.id}">VIEW PROFILE ↗</button></div></article>`).join('');$('#status').textContent=players.length?(shown.length?'':'No athletes match your filters.'):'The recruiting roster is being prepared. Player profiles will appear here as soon as approved athlete information is added to Google Sheets.';$('#roster').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>showProfile(players.find(p=>p.id===Number(b.dataset.id)))))}function showProfile(p){if(!p)return;const stats=[['Position',p.position],['Height',p.height],['Weight',p.weight],['40-Yard Dash',p.forty],['GPA',p.gpa],['Pro Shuttle',p.shuttle],['Vertical',p.vertical],['Broad Jump',p.broad],['Graduation Year',p.year]].filter(([,v])=>v);$('#profile-body').innerHTML=`<div class="profile-header"><img src="${esc(photoUrl(p.photo))}" onerror="this.onerror=null;this.src='/red-foxes.png'" alt="${esc(p.name)}"><div><div class="eyebrow">HARTSVILLE RED FOXES ${p.number?'· #'+esc(p.number):''}</div><h2>${esc(p.name)}</h2><p>${esc(p.position||'Football student-athlete')}</p></div></div><div class="stats">${stats.map(([k,v])=>`<div class="stat"><small>${esc(k)}</small><strong>${esc(v)}</strong></div>`).join('')}</div>${safeUrl(p.hudl)?`<a class="hudl" href="${esc(safeUrl(p.hudl))}" target="_blank" rel="noopener noreferrer">▶ WATCH HUDL HIGHLIGHTS</a>`:'<p class="empty">Hudl highlights coming soon.</p>'}${p.accolades?`<p><strong>Accolades:</strong> ${esc(p.accolades)}</p>`:''}${p.comments?`<p>${esc(p.comments)}</p>`:''}`;$('#profile').showModal()}$('#close').onclick=()=>$('#profile').close();$('#profile').addEventListener('click',e=>{if(e.target.id==='profile')e.target.close()});['#search','#position','#year'].forEach(id=>$(id).addEventListener(id==='#search'?'input':'change',render));async function load(){try{const r=await fetch('/api/players',{cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.error||'Unable to load roster');players=Array.isArray(d.players)?d.players:[];fillSelect('#position','position');fillSelect('#year','year');render()}catch(e){$('#status').textContent='Recruiting roster is not connected yet. The site is ready; the Google Sheet must be made readable to the website.';console.warn(e)}}load();setInterval(load,120000);
+
+let players = [];
+
+const $ = s => document.querySelector(s);
+
+const esc = s => String(s ?? '').replace(
+  /[&<>"']/g,
+  c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[c])
+);
+
+function safeUrl(v) {
+  try {
+    const u = new URL(v);
+    return ['http:', 'https:'].includes(u.protocol) ? u.href : '';
+  } catch {
+    return '';
+  }
+}
+
+function photoUrl(s) {
+  const u = safeUrl(s);
+  if (!u) return '/red-foxes.png';
+
+  const m = u.match(
+    /drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/
+  );
+
+  return m
+    ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w900`
+    : u;
+}
+
+function fillSelect(id, field) {
+  const s = $(id);
+  const old = s.value;
+
+  s.querySelectorAll('option:not([value=""])')
+    .forEach(o => o.remove());
+
+  [...new Set(players.map(p => p[field]).filter(Boolean))]
+    .sort()
+    .forEach(v => {
+      const o = document.createElement('option');
+      o.value = v;
+      o.textContent = v;
+      s.appendChild(o);
+    });
+
+  s.value = old;
+}
+
+function render() {
+  const term = $('#search').value.trim().toLowerCase();
+  const pos = $('#position').value;
+  const yr = $('#year').value;
+
+  const shown = players.filter(p =>
+    (!term ||
+      p.name.toLowerCase().includes(term) ||
+      p.number.toLowerCase().includes(term)) &&
+    (!pos || p.position === pos) &&
+    (!yr || p.year === yr)
+  );
+
+  $('#count').textContent =
+    `${shown.length} ATHLETE${shown.length === 1 ? '' : 'S'}`;
+
+  $('#roster').innerHTML = shown.map(p => `
+    <article class="player">
+      <img
+        src="${esc(photoUrl(p.photo))}"
+        onerror="this.onerror=null;this.src='/red-foxes.png'"
+        alt="${esc(p.name)} headshot"
+      >
+      <div class="info">
+        <div class="num">
+          ${p.number ? '#' + esc(p.number) + ' · ' : ''}
+          ${esc(p.year ? 'CLASS OF ' + p.year : 'HARTSVILLE RED FOXES')}
+        </div>
+        <h3>${esc(p.name)}</h3>
+        <div class="meta">
+          ${esc(p.position || 'Position to be announced')}
+          ${p.height ? ' · ' + esc(p.height) : ''}
+        </div>
+        <button data-id="${p.id}">VIEW PROFILE ↗</button>
+      </div>
+    </article>
+  `).join('');
+
+  $('#status').textContent = players.length
+    ? (shown.length ? '' : 'No athletes match your filters.')
+    : 'The recruiting roster is being prepared.';
+
+  $('#roster').querySelectorAll('button').forEach(b =>
+    b.addEventListener('click', () =>
+      showProfile(players.find(p => p.id === Number(b.dataset.id)))
+    )
+  );
+}
+
+function showProfile(p) {
+  if (!p) return;
+
+  const stats = [
+    ['Position', p.position],
+    ['Height', p.height],
+    ['Weight', p.weight],
+    ['Graduation Year', p.year],
+    ['GPA', p.gpa],
+    ['ACT', p.act],
+    ['Bench Press', p.bench],
+    ['Squat', p.squat],
+    ['Power Clean', p.powerClean],
+    ['40-Yard Dash', p.forty],
+    ['Pro Shuttle', p.shuttle],
+    ['Vertical', p.vertical],
+    ['Broad Jump', p.broad]
+  ].filter(([, v]) => v);
+
+  $('#profile-body').innerHTML = `
+    <div class="profile-header">
+      <img
+        src="${esc(photoUrl(p.photo))}"
+        onerror="this.onerror=null;this.src='/red-foxes.png'"
+        alt="${esc(p.name)}"
+      >
+      <div>
+        <div class="eyebrow">
+          HARTSVILLE RED FOXES
+          ${p.number ? '· #' + esc(p.number) : ''}
+        </div>
+        <h2>${esc(p.name)}</h2>
+        <p>${esc(p.position || 'Football student-athlete')}</p>
+      </div>
+    </div>
+
+    <div class="stats">
+      ${stats.map(([k, v]) => `
+        <div class="stat">
+          <small>${esc(k)}</small>
+          <strong>${esc(v)}</strong>
+        </div>
+      `).join('')}
+    </div>
+
+    ${safeUrl(p.hudl) ? `
+      <a class="hudl"
+         href="${esc(safeUrl(p.hudl))}"
+         target="_blank"
+         rel="noopener noreferrer">
+        ▶ WATCH HUDL HIGHLIGHTS
+      </a>
+    ` : '<p class="empty">Hudl highlights coming soon.</p>'}
+
+    ${p.accolades ? `
+      <p><strong>Accolades:</strong> ${esc(p.accolades)}</p>
+    ` : ''}
+
+    ${p.comments ? `<p>${esc(p.comments)}</p>` : ''}
+  `;
+
+  $('#profile').showModal();
+}
+
+$('#close').onclick = () => $('#profile').close();
+
+$('#profile').addEventListener('click', e => {
+  if (e.target.id === 'profile') e.target.close();
+});
+
+['#search', '#position', '#year'].forEach(id =>
+  $(id).addEventListener(
+    id === '#search' ? 'input' : 'change',
+    render
+  )
+);
+
+async function load() {
+  try {
+    const r = await fetch('/api/players', { cache: 'no-store' });
+    const d = await r.json();
+
+    if (!r.ok) {
+      throw new Error(d.error || 'Unable to load roster');
+    }
+
+    players = Array.isArray(d.players) ? d.players : [];
+
+    fillSelect('#position', 'position');
+    fillSelect('#year', 'year');
+    render();
+  } catch (e) {
+    $('#status').textContent =
+      'Recruiting roster is not connected yet.';
+    console.warn(e);
+  }
+}
+
+load();
+setInterval(load, 120000);
