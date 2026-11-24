@@ -14,81 +14,98 @@ const esc = s => String(s ?? '').replace(
   }[c])
 );
 
-function safeUrl(v) {
+function safeUrl(value) {
   try {
-    const u = new URL(v);
-    return ['http:', 'https:'].includes(u.protocol) ? u.href : '';
+    const url = new URL(value);
+    return ['http:', 'https:'].includes(url.protocol)
+      ? url.href
+      : '';
   } catch {
     return '';
   }
 }
 
-function photoUrl(s) {
-  const u = safeUrl(s);
-  if (!u) return '/red-foxes.png';
+function photoUrl(value) {
+  const url = safeUrl(value);
 
-  const m = u.match(
+  if (!url) return '/red-foxes.png';
+
+  const match = url.match(
     /drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/
   );
 
-  return m
-    ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w900`
-    : u;
+  return match
+    ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(match[1])}&sz=w900`
+    : url;
+}
+
+function rosterPhoto(player) {
+  return photoUrl(player.actionPhoto || player.photo);
+}
+
+function profilePhoto(player) {
+  return photoUrl(player.photo || player.actionPhoto);
 }
 
 function fillSelect(id, field) {
-  const s = $(id);
-  const old = s.value;
+  const select = $(id);
+  const previous = select.value;
 
-  s.querySelectorAll('option:not([value=""])')
-    .forEach(o => o.remove());
+  select.querySelectorAll('option:not([value=""])')
+    .forEach(option => option.remove());
 
   [...new Set(players.map(p => p[field]).filter(Boolean))]
     .sort()
-    .forEach(v => {
-      const o = document.createElement('option');
-      o.value = v;
-      o.textContent = v;
-      s.appendChild(o);
+    .forEach(value => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = value;
+      select.appendChild(option);
     });
 
-  s.value = old;
+  select.value = previous;
 }
 
 function render() {
   const term = $('#search').value.trim().toLowerCase();
-  const pos = $('#position').value;
-  const yr = $('#year').value;
+  const position = $('#position').value;
+  const year = $('#year').value;
 
-  const shown = players.filter(p =>
+  const shown = players.filter(player =>
     (!term ||
-      p.name.toLowerCase().includes(term) ||
-      p.number.toLowerCase().includes(term)) &&
-    (!pos || p.position === pos) &&
-    (!yr || p.year === yr)
+      player.name.toLowerCase().includes(term) ||
+      player.number.toLowerCase().includes(term)) &&
+    (!position || player.position === position) &&
+    (!year || player.year === year)
   );
 
   $('#count').textContent =
     `${shown.length} ATHLETE${shown.length === 1 ? '' : 'S'}`;
 
-  $('#roster').innerHTML = shown.map(p => `
+  $('#roster').innerHTML = shown.map(player => `
     <article class="player">
       <img
-        src="${esc(photoUrl(p.photo))}"
+        src="${esc(rosterPhoto(player))}"
         onerror="this.onerror=null;this.src='/red-foxes.png'"
-        alt="${esc(p.name)} headshot"
+        alt="${esc(player.name)} action photograph"
       >
+
       <div class="info">
         <div class="num">
-          ${p.number ? '#' + esc(p.number) + ' · ' : ''}
-          ${esc(p.year ? 'CLASS OF ' + p.year : 'HARTSVILLE RED FOXES')}
+          ${player.number ? '#' + esc(player.number) + ' · ' : ''}
+          ${esc(player.year ? 'CLASS OF ' + player.year : 'HARTSVILLE RED FOXES')}
         </div>
-        <h3>${esc(p.name)}</h3>
+
+        <h3>${esc(player.name)}</h3>
+
         <div class="meta">
-          ${esc(p.position || 'Position to be announced')}
-          ${p.height ? ' · ' + esc(p.height) : ''}
+          ${esc(player.position || 'Position to be announced')}
+          ${player.height ? ' · ' + esc(player.height) : ''}
         </div>
-        <button data-id="${p.id}">VIEW PROFILE ↗</button>
+
+        <button data-id="${player.id}">
+          VIEW PROFILE ↗
+        </button>
       </div>
     </article>
   `).join('');
@@ -97,72 +114,115 @@ function render() {
     ? (shown.length ? '' : 'No athletes match your filters.')
     : 'The recruiting roster is being prepared.';
 
-  $('#roster').querySelectorAll('button').forEach(b =>
-    b.addEventListener('click', () =>
-      showProfile(players.find(p => p.id === Number(b.dataset.id)))
+  $('#roster').querySelectorAll('button').forEach(button =>
+    button.addEventListener('click', () =>
+      showProfile(
+        players.find(p => p.id === Number(button.dataset.id))
+      )
     )
   );
 }
 
-function showProfile(p) {
-  if (!p) return;
+function stat(label, value) {
+  if (!value) return '';
 
-  const stats = [
-    ['Position', p.position],
-    ['Height', p.height],
-    ['Weight', p.weight],
-    ['Graduation Year', p.year],
-    ['GPA', p.gpa],
-    ['ACT', p.act],
-    ['Bench Press', p.bench],
-    ['Squat', p.squat],
-    ['Power Clean', p.powerClean],
-    ['40-Yard Dash', p.forty],
-    ['Pro Shuttle', p.shuttle],
-    ['Vertical', p.vertical],
-    ['Broad Jump', p.broad]
-  ].filter(([, v]) => v);
+  return `
+    <div class="stat">
+      <small>${esc(label)}</small>
+      <strong>${esc(value)}</strong>
+    </div>
+  `;
+}
+
+function section(title, stats) {
+  const content = stats
+    .map(([label, value]) => stat(label, value))
+    .join('');
+
+  if (!content) return '';
+
+  return `
+    <div class="profile-section">
+      <h3>${esc(title)}</h3>
+      <div class="stats">${content}</div>
+    </div>
+  `;
+}
+
+function showProfile(player) {
+  if (!player) return;
+
+  const personal = section('Player Information', [
+    ['Position', player.position],
+    ['Height', player.height],
+    ['Weight', player.weight],
+    ['Graduation Year', player.year]
+  ]);
+
+  const academics = section('Academics', [
+    ['GPA', player.gpa],
+    ['ACT', player.act]
+  ]);
+
+  const strength = section('Strength', [
+    ['Bench Press', player.bench],
+    ['Squat', player.squat],
+    ['Power Clean', player.powerClean]
+  ]);
+
+  const testing = section('Athletic Testing', [
+    ['40-Yard Dash', player.forty],
+    ['Pro Shuttle', player.shuttle],
+    ['Vertical Jump', player.vertical],
+    ['Broad Jump', player.broad]
+  ]);
+
+  const hudl = safeUrl(player.hudl);
 
   $('#profile-body').innerHTML = `
     <div class="profile-header">
       <img
-        src="${esc(photoUrl(p.photo))}"
+        src="${esc(profilePhoto(player))}"
         onerror="this.onerror=null;this.src='/red-foxes.png'"
-        alt="${esc(p.name)}"
+        alt="${esc(player.name)} headshot"
       >
+
       <div>
         <div class="eyebrow">
           HARTSVILLE RED FOXES
-          ${p.number ? '· #' + esc(p.number) : ''}
+          ${player.number ? ' · #' + esc(player.number) : ''}
         </div>
-        <h2>${esc(p.name)}</h2>
-        <p>${esc(p.position || 'Football student-athlete')}</p>
+
+        <h2>${esc(player.name)}</h2>
+
+        <p>${esc(player.position || 'Football student-athlete')}</p>
       </div>
     </div>
 
-    <div class="stats">
-      ${stats.map(([k, v]) => `
-        <div class="stat">
-          <small>${esc(k)}</small>
-          <strong>${esc(v)}</strong>
-        </div>
-      `).join('')}
-    </div>
+    ${personal}
+    ${academics}
+    ${strength}
+    ${testing}
 
-    ${safeUrl(p.hudl) ? `
-      <a class="hudl"
-         href="${esc(safeUrl(p.hudl))}"
-         target="_blank"
-         rel="noopener noreferrer">
-        ▶ WATCH HUDL HIGHLIGHTS
-      </a>
-    ` : '<p class="empty">Hudl highlights coming soon.</p>'}
-
-    ${p.accolades ? `
-      <p><strong>Accolades:</strong> ${esc(p.accolades)}</p>
+    ${player.accolades ? `
+      <div class="profile-section">
+        <h3>Accolades</h3>
+        <p>${esc(player.accolades)}</p>
+      </div>
     ` : ''}
 
-    ${p.comments ? `<p>${esc(p.comments)}</p>` : ''}
+    <div class="profile-section">
+      <h3>Highlight Film</h3>
+
+      ${hudl ? `
+        <a class="hudl"
+           href="${esc(hudl)}"
+           target="_blank"
+           rel="noopener noreferrer">
+          ▶ WATCH HUDL HIGHLIGHTS
+        </a>
+      ` : '<p class="empty">Hudl highlights coming soon.</p>'}
+    </div>
   `;
 
   $('#profile').showModal();
@@ -170,8 +230,10 @@ function showProfile(p) {
 
 $('#close').onclick = () => $('#profile').close();
 
-$('#profile').addEventListener('click', e => {
-  if (e.target.id === 'profile') e.target.close();
+$('#profile').addEventListener('click', event => {
+  if (event.target.id === 'profile') {
+    event.target.close();
+  }
 });
 
 ['#search', '#position', '#year'].forEach(id =>
@@ -183,24 +245,35 @@ $('#profile').addEventListener('click', e => {
 
 async function load() {
   try {
-    const r = await fetch('/api/players', { cache: 'no-store' });
-    const d = await r.json();
+    const response = await fetch('/api/players', {
+      cache: 'no-store'
+    });
 
-    if (!r.ok) {
-      throw new Error(d.error || 'Unable to load roster');
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Unable to load recruiting roster'
+      );
     }
 
-    players = Array.isArray(d.players) ? d.players : [];
+    players = Array.isArray(data.players)
+      ? data.players
+      : [];
 
     fillSelect('#position', 'position');
     fillSelect('#year', 'year');
+
     render();
-  } catch (e) {
+
+  } catch (error) {
     $('#status').textContent =
       'Recruiting roster is not connected yet.';
-    console.warn(e);
+
+    console.warn(error);
   }
 }
 
 load();
+
 setInterval(load, 120000);
